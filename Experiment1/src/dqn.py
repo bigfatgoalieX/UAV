@@ -103,8 +103,8 @@ class DQNAgent:
 
         # generate target
         with torch.no_grad():
-            indices = torch.argmax(self._qnet(s_), dim=1)
-            q_s_a = self._qnet(s_).gather(1, indices.reshape(-1, 1)).reshape(-1)
+            indices = torch.argmax(self._target_qnet(s_), dim=1)
+            q_s_a = self._target_qnet(s_).gather(1, indices.reshape(-1, 1)).reshape(-1)
             label = r + GAMMA * q_s_a * (1 - d)
             target = self._qnet(s).scatter(1, a.reshape(-1, 1), label.reshape(-1, 1).float())
 
