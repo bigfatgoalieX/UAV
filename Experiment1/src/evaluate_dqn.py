@@ -5,7 +5,7 @@ import time
 if __name__ == "__main__":
     env = FlyCircle()
     agent = DQNAgent(env.get_obs_dim(), env.get_action_cnt())
-    agent.load("path/to/model")
+    agent.load(r"dqn\20240310-175853\models\9981.pkl")
 
     state = env.reset()
     done = False
