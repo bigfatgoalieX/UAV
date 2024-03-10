@@ -5,7 +5,7 @@ import time
 if __name__ == "__main__":
     env = FlyCircle()
     agent = DDPGAgent(env.get_obs_dim(), env.get_action_dim())
-    agent.load(r"ddpg\20240305-183538\models\981.pkl")
+    agent.load("path/to/model")
 
     state = env.reset()
     done = False
