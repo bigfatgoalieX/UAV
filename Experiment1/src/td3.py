@@ -124,7 +124,9 @@ class TD3Agent:
             a = a.detach().cpu().numpy()
         
         # TODO: apply "Target Policy Smoothing Regularization"
-        return a
+        noise = np.random.normal(0, STD, (self._act_dim,))
+        a += noise
+        return np.clip(a, -1, 1)
 
     def choose_action(self, obs):
         o = torch.tensor(np.array(obs)).float()
@@ -160,7 +162,11 @@ class TD3Agent:
         next_sa_tensor = torch.cat([next_s_tensor, next_a_tensor], dim=1)
         with torch.no_grad():
             # TODO: generate target_q with "Clipped Double Q-Learning for Actor-Critic"
-            target_q = None
+            y1 = r_tensor + GAMMA * self._target_critic[0](next_sa_tensor)
+            y2 = r_tensor + GAMMA * self._target_critic[1](next_sa_tensor)
+            target_q = min(y1,y2)
+            
+            
         now_sa_tensor = torch.cat([s_tensor, a_tensor], dim=1)
         q_loss_log = [0, 0]
         for i in range(2):
@@ -172,9 +178,23 @@ class TD3Agent:
             self._critic_opt[i].step()
             q_loss_log[i] = q_loss.detach().cpu().item()
 
-        a_loss_log = 0
+        
         # TODO: update actor and target network with "Target Networks and Delayed Policy Updates"
+        if self._step % DELAY == 0:
+            # update actor
+            a_loss_log = 0
+            new_a_tensor = self._actor(s_tensor)
+            new_sa_tensor = torch.cat([s_tensor, new_a_tensor], dim=1)
+            q = -self._critic(new_sa_tensor).mean()
+            self._actor_opt.zero_grad()
+            q.backward()
+            self._actor_opt.step()
+            a_loss_log = q.detach().cpu().item()
+            
+            # update target network
+            self.soft_upd()
 
+        
         if self._step % 500 == 0:
             self._sw.add_scalar('loss/critic_0', q_loss_log[0], self._step)
             self._sw.add_scalar('loss/critic_1', q_loss_log[1], self._step)

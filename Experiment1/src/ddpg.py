@@ -150,7 +150,9 @@ class DDPGAgent:
         next_sa_tensor = torch.cat([next_s_tensor, next_a_tensor], dim=1)
         with torch.no_grad():
             target_q = r_tensor + GAMMA * self._target_critic(next_sa_tensor)
+        
         now_sa_tensor = torch.cat([s_tensor, a_tensor], dim=1)
+        
         now_q = self._critic(now_sa_tensor)
         q_loss_fn = torch.nn.MSELoss()
         q_loss = q_loss_fn(now_q, target_q)
