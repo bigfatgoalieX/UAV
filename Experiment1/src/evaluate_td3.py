@@ -5,7 +5,7 @@ import time
 if __name__ == "__main__":
     env = FlyCircle()
     agent = TD3Agent(env.get_obs_dim(), env.get_action_dim())
-    agent.load(r"ddpg\20240310-193212\models\981.pkl")
+    agent.load(r"td3\20240312-195847\models\981.pkl")
 
     state = env.reset()
     done = False

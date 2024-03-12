@@ -164,7 +164,7 @@ class TD3Agent:
             # TODO: generate target_q with "Clipped Double Q-Learning for Actor-Critic"
             y1 = r_tensor + GAMMA * self._target_critic[0](next_sa_tensor)
             y2 = r_tensor + GAMMA * self._target_critic[1](next_sa_tensor)
-            target_q = min(y1,y2)
+            target_q = torch.min(y1,y2)
             
             
         now_sa_tensor = torch.cat([s_tensor, a_tensor], dim=1)
@@ -185,7 +185,9 @@ class TD3Agent:
             a_loss_log = 0
             new_a_tensor = self._actor(s_tensor)
             new_sa_tensor = torch.cat([s_tensor, new_a_tensor], dim=1)
-            q = -self._critic(new_sa_tensor).mean()
+            q = -self._critic[0](new_sa_tensor).mean()
+            # q = -(self._critic[0](new_sa_tensor).mean() + self._critic[1](new_sa_tensor).mean()) 
+            # maybe?
             self._actor_opt.zero_grad()
             q.backward()
             self._actor_opt.step()
