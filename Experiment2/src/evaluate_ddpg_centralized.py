@@ -4,7 +4,7 @@ from ddpg_centralized import DDPGAgent
 if __name__ == "__main__":
     env = SampleEnv()
     agent = DDPGAgent(6, 2)
-    agent.load(r"ddpg_centralized\20240310-175318\models\981.pkl")
+    agent.load(r"ddpg_centralized\20240401-165401\models\981.pkl")
 
     state = env.reset()
     done = False

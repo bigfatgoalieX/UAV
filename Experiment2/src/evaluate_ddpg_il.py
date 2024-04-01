@@ -7,7 +7,7 @@ if __name__ == "__main__":
     env = SampleEnv()
     agent = [DDPGAgent(6, 1) for _ in range(2)]
 
-    state_dicts = torch.load(r"ddpg_il\20240311-131632\models\981.pkl")
+    state_dicts = torch.load(r"ddpg_il\20240401-162925\models\981.pkl")
     for i in range(2):
         agent[i].load_state_dict(state_dicts[i])
 

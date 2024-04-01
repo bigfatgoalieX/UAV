@@ -216,7 +216,10 @@ class DDPGTrainer:
             if self._step % 20 == 0 and self._replay_buffer.n_samples() > START_UPDATE_SAMPLES:
                 for _ in range(20):
                     # TODO: update agents
-                    pass
+                    s, a, r, s_ = self._replay_buffer.sample(BATCH_SIZE)
+                    a_ = self._agent.query_target_action(s_)
+                    self._agent.update(s, a, r, s_, a_)
+                    # pass
                     # TODO_END
 
             total_rew += reward

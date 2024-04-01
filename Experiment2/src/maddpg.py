@@ -7,6 +7,7 @@ from sample_env import SampleEnv
 from utils import get_average_gradient
 
 
+
 class Critic(nn.Module):
 
     def __init__(self, *args, **kwargs) -> None:
@@ -102,13 +103,24 @@ class MADDPGAgent:
         r_tensor = torch.tensor(r)
         nx_tensor = torch.tensor(x_)
 
-        next_state_actions = [nx_tensor]
+        next_state_inputs = [nx_tensor]
+        
+        # print(nx_tensor)
+        # print('\n')
+        
+        # to construct input for function Qi
+        # reference PPT Page43
         for i in range(2):
             with torch.no_grad():
-                a_ = self.target_actor[i](x_tensor[:, i * 3:i * 3 + 3])  # hard coded state -> obs
-            next_state_actions.append(a_)
+                a_ = self.target_actor[i](nx_tensor[:, i * 3:i * 3 + 3])  # hard coded state -> obs
+                # print(a_)
+                # print('\n')
+            next_state_inputs.append(a_)
         
-        n_sa_tensor = torch.concatenate(next_state_actions, dim=1)  # NOTICE: check shape
+        # print(next_state_inputs)
+        # print('\n')
+        
+        n_sa_tensor = torch.concatenate(next_state_inputs, dim=1)  # NOTICE: check shape
         with torch.no_grad():
             q = r_tensor[:, ai] + 0.95 * self.target_critic[ai](n_sa_tensor).view(-1)
 
@@ -119,7 +131,9 @@ class MADDPGAgent:
 
         # critic loss
         # TODO: add critic_loss
-        q_loss = None
+        q_loss_fn = torch.nn.MSELoss()
+        q_loss = q_loss_fn(q_hat, q)
+        # q_loss = None
         # TODO_END
         self.q_opt[ai].zero_grad()
         q_loss.backward()
@@ -127,7 +141,44 @@ class MADDPGAgent:
 
         # actor loss
         # TODO: add actor_loss
-        a_loss = None
+        
+        current_state_inputs = [x_tensor]
+        
+        # print('x_tensor:\n')
+        # print(x_tensor)
+        # print('\n')
+        
+        for i in range(2):
+            if i == ai:
+                new_action = self.actor[ai](x_tensor[:, ai * 3:ai * 3 + 3])
+                # print('new_action:\n')
+                # print(new_action)
+                # print('\n')
+                current_state_inputs.append(new_action)
+                
+                # print('a_tensor\n')
+                # print(a_tensor)
+                # print('\n')
+            # shape matters
+            ith_action = a_tensor[:,i]
+            ith_action_shaped = ith_action.view(-1,1)
+            # print('ith_action_shaped\n')
+            # print(ith_action_shaped)
+            # print('\n')
+            current_state_inputs.append(ith_action_shaped)
+
+        # n_sa_tensor = torch.concatenate(next_state_inputs, dim=1)  # NOTICE: check shape
+        # print(current_state_inputs)
+        new_sa_tensor = torch.concatenate(current_state_inputs, dim = 1)
+        
+        # reference from ddpg.py:
+        # new_a_tensor = self._actor(s_tensor)
+        # new_sa_tensor = torch.cat([s_tensor, new_a_tensor], dim=1)
+        # q = -self._critic(new_sa_tensor).mean()
+        
+        a_loss = -self.critic[ai](new_sa_tensor).mean()
+        #.mean() or .view(-1) ? 
+        # a_loss = None
         # TODO_END
         self.q_opt[ai].zero_grad()
         self.a_opt[ai].zero_grad()
@@ -216,7 +267,7 @@ def main():
         app.train_one_episode()
         if episode % 1000 == 0:
             app.eval_one_episode()
-            app.agent.save(f'models/{episode}.th')
+            app.agent.save(f'maddpg/{episode}.th')
 
 
 if __name__ == '__main__':

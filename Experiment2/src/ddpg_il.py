@@ -229,7 +229,10 @@ class DDPGTrainer:
                 for _ in range(20):
                     for i in range(2):
                         # TODO: update agents
-                        pass
+                        s, a, r, s_ = self._replay_buffer[i].sample(BATCH_SIZE)
+                        a_ = self._agent[i].query_target_action(s_)
+                        self._agent[i].update(s, a, r, s_, a_)
+                        # pass
                         # TODO_END
 
             total_rew += reward.sum()
