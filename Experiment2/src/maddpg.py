@@ -248,7 +248,7 @@ def main():
         app.train_one_episode()
         if episode % 1000 == 0:
             app.eval_one_episode()
-            app.agent.save(f'maddpg/{episode}.th')
+            app.agent.save(f'maddpg_2/{episode}.th')
 
 
 if __name__ == '__main__':
