@@ -105,20 +105,14 @@ class MADDPGAgent:
 
         next_state_inputs = [nx_tensor]
         
-        # print(nx_tensor)
-        # print('\n')
         
         # to construct input for function Qi
         # reference PPT Page43
         for i in range(2):
             with torch.no_grad():
                 a_ = self.target_actor[i](nx_tensor[:, i * 3:i * 3 + 3])  # hard coded state -> obs
-                # print(a_)
-                # print('\n')
             next_state_inputs.append(a_)
         
-        # print(next_state_inputs)
-        # print('\n')
         
         n_sa_tensor = torch.concatenate(next_state_inputs, dim=1)  # NOTICE: check shape
         with torch.no_grad():
@@ -144,31 +138,18 @@ class MADDPGAgent:
         
         current_state_inputs = [x_tensor]
         
-        # print('x_tensor:\n')
-        # print(x_tensor)
-        # print('\n')
         
         for i in range(2):
             if i == ai:
                 new_action = self.actor[ai](x_tensor[:, ai * 3:ai * 3 + 3])
-                # print('new_action:\n')
-                # print(new_action)
-                # print('\n')
                 current_state_inputs.append(new_action)
-                
-                # print('a_tensor\n')
-                # print(a_tensor)
-                # print('\n')
-            # shape matters
-            ith_action = a_tensor[:,i]
-            ith_action_shaped = ith_action.view(-1,1)
-            # print('ith_action_shaped\n')
-            # print(ith_action_shaped)
-            # print('\n')
-            current_state_inputs.append(ith_action_shaped)
+            else:
+                # shape matters
+                ith_action = a_tensor[:,i]
+                ith_action_shaped = ith_action.view(-1,1)
+                current_state_inputs.append(ith_action_shaped)
 
         # n_sa_tensor = torch.concatenate(next_state_inputs, dim=1)  # NOTICE: check shape
-        # print(current_state_inputs)
         new_sa_tensor = torch.concatenate(current_state_inputs, dim = 1)
         
         # reference from ddpg.py:
