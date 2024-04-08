@@ -130,6 +130,7 @@ void loop() {
     udp_server.endPacket();
 
     // TODO: send action to the flight controller by UART (Serial -> Crazyflie)
+    n = encode_float_vals(&action, 1, uart_write_buffer);
     Serial.write(uart_write_buffer, n);
     // what is uart_write_buffer?
   }

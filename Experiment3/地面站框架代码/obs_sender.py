@@ -31,7 +31,7 @@ def main():
     for step in range(10):
         obs = np.random.uniform(0, 1, (2, ))
         print(obs)
-        send_obs(obs, "192.168.0.32", 1234)
+        send_obs(obs, "192.168.31.133", 1234)
         time.sleep(1)
 
 
