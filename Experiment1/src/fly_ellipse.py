@@ -23,6 +23,13 @@ class FlyEllipse:
         self.eccentricity = 4/5
         self.a = self.foci / self.eccentricity
         self.b = math.sqrt(self.a**2-self.foci**2)
+        
+        
+        # former state added
+        self.uav_former_theta = np.zeros(1, dtype=np.float32)
+        self.uav_former_pos = self.uav_pos = np.zeros(3, dtype=np.float32)
+        
+        
 
         self.step_cnt = 0
 
@@ -40,6 +47,16 @@ class FlyEllipse:
         # self.uav_pos[1] -= self.radius
         self.uav_pos[1] -= self.b
         self.uav_theta = np.zeros(1, dtype=np.float32)
+        
+        
+        
+        self.uav_former_pos = self.center.copy()
+        # self.uav_pos[1] -= self.radius
+        self.uav_former_pos[1] -= self.b
+        self.uav_former_theta = np.zeros(1, dtype=np.float32)
+
+
+
 
         self.step_cnt = 0
         return self.get_obs()
@@ -49,6 +66,7 @@ class FlyEllipse:
         self.step_cnt += 1
 
         # update uav theta
+        self.uav_theta = self.uav_theta
         self.uav_theta += action * MAX_DA * DT
         # I don't understand... Is this w*dt?
         
@@ -59,6 +77,9 @@ class FlyEllipse:
             self.uav_theta += 2 * np.pi
         
         # update uav pos
+        self.uav_former_pos[0] = self.uav_pos[0]
+        self.uav_former_pos[1] = self.uav_pos[1]
+        
         self.uav_pos[0] += VELOCITY * np.cos(self.uav_theta) * DT
         self.uav_pos[1] += VELOCITY * np.sin(self.uav_theta) * DT
 
@@ -74,8 +95,16 @@ class FlyEllipse:
 
     def get_reward(self):
         # rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.center[:2]) - self.radius)
-        rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.f1[:2]) + \
-                      np.linalg.norm(self.uav_pos[:2] - self.f2[:2]) - 2*self.a)
+        # rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.f1[:2]) + \
+        #               np.linalg.norm(self.uav_pos[:2] - self.f2[:2]) - 2*self.a)
+        
+        # s->_s
+        s_bias = np.abs(np.linalg.norm(self.uav_former_pos[:2] - self.f1[:2]) + \
+                       np.linalg.norm(self.uav_former_pos[:2] - self.f2[:2]) - 2*self.a)
+        _s_bias = np.abs(np.linalg.norm(self.uav_pos[:2] - self.f1[:2]) + \
+                       np.linalg.norm(self.uav_pos[:2] - self.f2[:2]) - 2*self.a)
+        rew = s_bias - _s_bias
+        
         return rew
 
     def get_done(self):
