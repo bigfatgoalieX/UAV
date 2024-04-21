@@ -17,8 +17,8 @@ class FlyEllipse:
         
         # ellipse center, foci, eccentricity
         self.center = np.array([0, -1, 0], dtype=np.float32)
-        self.f1 = np.array([0, -4/3, 0], dtype=np.float32)
-        self.f2 = np.array([0, 4/3, 0], dtype=np.float32)
+        self.f1 = np.array([-4/3, -1, 0], dtype=np.float32)
+        self.f2 = np.array([4/3, -1, 0], dtype=np.float32)
         self.foci = 4/3
         self.eccentricity = 4/5
         self.a = self.foci / self.eccentricity
@@ -94,14 +94,15 @@ class FlyEllipse:
                 exit(0)
 
         self.screen.fill("white")
-        # target circle
-        pygame.draw.circle(self.screen, "black", self.center[:2] * self.scale + self.offset, self.scale * 1, 1)
         
-        # target ellipse center(0,-1)
+        # target circle
+        # pygame.draw.circle(self.screen, "black", self.center[:2] * self.scale + self.offset, self.scale * 1, 1)
+        
+        # target ellipse center (0,-1)
         pygame.draw.ellipse(self.screen, "black", pygame.Rect(225, 210, 150, 90),1)
         
         #vertical ellipse center (0,0)
-        pygame.draw.ellipse(self.screen, "black", pygame.Rect(255, 225, 90, 150),1)
+        # pygame.draw.ellipse(self.screen, "black", pygame.Rect(255, 225, 90, 150),1)
 
         # uav
         pygame.draw.circle(self.screen, "blue", self.uav_pos[:2] * self.scale + self.offset, 5)
