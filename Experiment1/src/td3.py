@@ -6,6 +6,7 @@ from datetime import datetime
 
 from fly_circle import FlyCircle
 from fly_ellipse import FlyEllipse
+from fly_parabola import FlyParabola
 
 ACTOR_LR = 1e-4
 CRITIC_LR = 1e-3
@@ -276,7 +277,7 @@ class TD3Trainer:
 
 if __name__ == "__main__":
     torch.set_num_threads(1)
-    env = FlyEllipse()
+    env = FlyParabola()
     trainer = TD3Trainer(env)
 
     for i in range(1000):
