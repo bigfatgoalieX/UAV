@@ -1,11 +1,12 @@
 from fly_circle import FlyCircle
+from fly_ellipse import FlyEllipse
 from td3 import TD3Agent
 import time
 
 if __name__ == "__main__":
-    env = FlyCircle()
+    env = FlyEllipse()
     agent = TD3Agent(env.get_obs_dim(), env.get_action_dim())
-    agent.load(r"td3\20240312-195847\models\981.pkl")
+    agent.load(r"td3\20240421-193750_vertical\models\981.pkl")
 
     state = env.reset()
     done = False

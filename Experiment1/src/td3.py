@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 
 from fly_circle import FlyCircle
+from fly_ellipse import FlyEllipse
 
 ACTOR_LR = 1e-4
 CRITIC_LR = 1e-3
@@ -275,7 +276,7 @@ class TD3Trainer:
 
 if __name__ == "__main__":
     torch.set_num_threads(1)
-    env = FlyCircle()
+    env = FlyEllipse()
     trainer = TD3Trainer(env)
 
     for i in range(1000):

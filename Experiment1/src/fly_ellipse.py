@@ -1,18 +1,28 @@
 import numpy as np
 import pygame
+import math
 
 VELOCITY = 0.25
 MAX_DA = 1
 DT = 0.2
 
-class FlyCircle:
+class FlyEllipse:
     def __init__(self) -> None:
         self.uav_pos = np.zeros(3, dtype=np.float32)
         self.uav_theta = np.zeros(1, dtype=np.float32)
 
         # circle center and radius
+        # self.center = np.array([0, -1, 0], dtype=np.float32)
+        # self.radius = 1
+        
+        # ellipse center, foci, eccentricity
         self.center = np.array([0, -1, 0], dtype=np.float32)
-        self.radius = 1
+        self.f1 = np.array([0, -4/3, 0], dtype=np.float32)
+        self.f2 = np.array([0, 4/3, 0], dtype=np.float32)
+        self.foci = 4/3
+        self.eccentricity = 4/5
+        self.a = self.foci / self.eccentricity
+        self.b = math.sqrt(self.a**2-self.foci**2)
 
         self.step_cnt = 0
 
@@ -27,7 +37,8 @@ class FlyCircle:
     # reset env state
     def reset(self):
         self.uav_pos = self.center.copy()
-        self.uav_pos[1] -= self.radius
+        # self.uav_pos[1] -= self.radius
+        self.uav_pos[1] -= self.b
         self.uav_theta = np.zeros(1, dtype=np.float32)
 
         self.step_cnt = 0
@@ -62,7 +73,9 @@ class FlyCircle:
         return obs
 
     def get_reward(self):
-        rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.center[:2]) - self.radius)
+        # rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.center[:2]) - self.radius)
+        rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.f1[:2]) + \
+                      np.linalg.norm(self.uav_pos[:2] - self.f2[:2]) - 2*self.a)
         return rew
 
     def get_done(self):
@@ -73,7 +86,7 @@ class FlyCircle:
             pygame.init()
             self.screen = pygame.display.set_mode((600, 600))
             self.offset = np.array([300, 300]) - self.center[:2]
-            self.scale = 50
+            self.scale = 45
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -82,8 +95,14 @@ class FlyCircle:
 
         self.screen.fill("white")
         # target circle
-        pygame.draw.circle(self.screen, "black", self.center[:2] * self.scale + self.offset, self.scale * self.radius, 1)
+        pygame.draw.circle(self.screen, "black", self.center[:2] * self.scale + self.offset, self.scale * 1, 1)
         
+        # target ellipse center(0,-1)
+        pygame.draw.ellipse(self.screen, "black", pygame.Rect(225, 210, 150, 90),1)
+        
+        #vertical ellipse center (0,0)
+        pygame.draw.ellipse(self.screen, "black", pygame.Rect(255, 225, 90, 150),1)
+
         # uav
         pygame.draw.circle(self.screen, "blue", self.uav_pos[:2] * self.scale + self.offset, 5)
 
