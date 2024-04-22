@@ -16,6 +16,10 @@ class FlyParabola:
         self.a = -1
         self.b = 0
         self.c = 0
+        
+        self.focus = np.array([0, -0.25, 0], dtype=np.float32)
+        self.directrix = 0.25
+        
         self.funcvalue = 0
         
         self.step_cnt = 0
@@ -68,7 +72,9 @@ class FlyParabola:
 
     def get_reward(self):
         # rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.center[:2]) - self.radius)
-        rew = -np.abs(self.uav_pos[1] - self.funcvalue)
+        distance_to_focus = np.linalg.norm(self.uav_pos[:2] - self.focus[:2])
+        distance_to_directrix = np.abs(self.directrix - self.uav_pos[1])
+        rew = -np.abs(distance_to_focus - distance_to_directrix)
         return rew
 
     def get_done(self):

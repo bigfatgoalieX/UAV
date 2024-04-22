@@ -7,6 +7,7 @@ from datetime import datetime
 from fly_circle import FlyCircle
 from fly_ellipse import FlyEllipse
 from fly_parabola import FlyParabola
+from fly_moving_circle import FlyMovingCircle
 
 ACTOR_LR = 1e-4
 CRITIC_LR = 1e-3
@@ -18,7 +19,7 @@ GAMMA = 0.95
 BATCH_SIZE = 128
 START_UPDATE_SAMPLES = 200
 
-MAIN_FOLDER = "td3/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+MAIN_FOLDER = "td3/" + datetime.now().strftime("%Y%m%d-%H%M%S") + '_movingcircle'
 
 
 class Actor(torch.nn.Module):
@@ -277,7 +278,7 @@ class TD3Trainer:
 
 if __name__ == "__main__":
     torch.set_num_threads(1)
-    env = FlyParabola()
+    env = FlyMovingCircle()
     trainer = TD3Trainer(env)
 
     for i in range(1000):
