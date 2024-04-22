@@ -101,3 +101,5 @@ class FlyMovingCircle:
         pygame.draw.line(self.screen, "black", st, ed)
 
         pygame.display.flip()
+        pygame.image.save(self.screen, f"D:/NJU_undergraduate/大三下/无人机/homework/GIF/movingcicle_{self.step_cnt}.png")
+

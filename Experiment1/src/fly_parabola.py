@@ -69,9 +69,12 @@ class FlyParabola:
     def get_obs(self):
         obs = np.hstack([self.uav_pos[:2] - self.center[:2], self.uav_theta])
         return obs
-
+    
+    # def get_reward(self):
+    #     rew = -np.abs(self.uav_pos[1] - self.funcvalue)
+    #     return rew
+     
     def get_reward(self):
-        # rew = -np.abs(np.linalg.norm(self.uav_pos[:2] - self.center[:2]) - self.radius)
         distance_to_focus = np.linalg.norm(self.uav_pos[:2] - self.focus[:2])
         distance_to_directrix = np.abs(self.directrix - self.uav_pos[1])
         rew = -np.abs(distance_to_focus - distance_to_directrix)
@@ -99,7 +102,7 @@ class FlyParabola:
         self.screen.fill("white")
         
         for x in range(0,600):
-            y = self.get_parabola_value(x-300) + 300
+            y = (self.get_parabola_value(x-300)/self.scale + 300)
             pygame.draw.circle(self.screen, "black", (x,y), 1)
         
         # target circle
@@ -121,3 +124,4 @@ class FlyParabola:
         pygame.draw.line(self.screen, "black", st, ed)
 
         pygame.display.flip()
+        pygame.image.save(self.screen, f"D:/NJU_undergraduate/大三下/无人机/homework/GIF/parabola/parabola_{self.step_cnt}.png")
