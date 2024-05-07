@@ -102,9 +102,9 @@ class TreesGo:
 
     UAV_OBS_DIS = 1.0
 
-    CRASH_DIS = 0.25
-    TARGET_DIS = 1.0
-    U_COLLISION_DIS = 0.5
+    CRASH_DIS = 0.3
+    TARGET_DIS = 0.5
+    U_COLLISION_DIS = 0.4
 
     MAX_STEP = 300
 
@@ -114,7 +114,7 @@ class TreesGo:
         self.real_uav_cnt = config.getint("common", "real_uav_cnt")
         self.dt = config.getfloat("uav", "dt")
 
-        assert self.uav_cnt <= 4
+        assert self.uav_cnt <= 7
         # 注意在trees_go.ini中修改真机的数量
         assert self.real_uav_cnt == len(real_uavs)
 
@@ -140,7 +140,7 @@ class TreesGo:
         self._render = None
 
         self.obs_dim = 14 + 6 + 2
-        self.act_dim = 1
+        self.act_dim = 2
 
         self.alpha = alpha
         self.beta = beta
@@ -259,13 +259,13 @@ class TreesGo:
     def reset(self, mode="train"):
         self._done = np.zeros((self.uav_cnt, ), np.bool8)
         
-        number_of_trees = 10
+        number_of_trees = 12
 
         self._obstacles = np.random.uniform([-2.39, -5.0, TreesGo.CRASH_DIS], [1.59, 0.5, TreesGo.CRASH_DIS], (number_of_trees, 3)) # np.array(random_trees)
         self._kd = KDTree(self._obstacles[:, :2])  # add all center of trees into kd-tree
 
-        pos = [[1.6, 1.2], [-1.1, 1.2], [0.1, 1.2], [-2.3, 1.2]]
-        tar = [[1.0, -6.0], [0.0, -6.0], [-1.0, -6.0], [-2.0, -6.0]]
+        pos = [[1.6, 1.2], [0.8, 1.2], [0.1, 1.2], [-0.5, 1.2], [-1.1, 1.2], [-1.7, 1.2], [-2.3, 1.2]]
+        tar = [[2.0, -6.0], [1.3, -6.0], [0.6, -6.0], [0.0, -6.0], [-0.6, -6.0], [-1.3, -6.0], [-2.0, -6.0]]
         # np.random.shuffle(pos)
         np.random.shuffle(tar)
 
@@ -308,13 +308,16 @@ class TreesGo:
         self._step += 1
         self._prev_pos = np.copy(self._pos)
         u = np.zeros((self.uav_cnt, ))
+        v = np.zeros((self.uav_cnt, ))
 
         d_stop = []
         for i in range(self.uav_cnt):
             name = f'uav_{i}'
             d = self._done[i]
             if name in actions:
-                u[i] = actions[name]
+                # print(actions[name])
+                u[i] = actions[name][0]
+                v[i] = actions[name][1]
             else:
                 d = True
             d_stop.append(d)
@@ -324,7 +327,7 @@ class TreesGo:
         obs = self.get_obs()
         for i, uav in enumerate(self.uavs.values()):
             if not self._done[i]:
-                uav.take_action(obs[f'uav_{i}'], [u[i], 0])
+                uav.take_action(obs[f'uav_{i}'], [u[i], v[i]])
 
         # waiting for real uav to fly...
         if self.real_uav_cnt > 0:
