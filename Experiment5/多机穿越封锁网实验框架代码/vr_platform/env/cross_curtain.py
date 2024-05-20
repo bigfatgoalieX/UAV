@@ -19,7 +19,7 @@ class CrossCurtain:
             self.uav_list.append(SimUav())
         self.uavs = {f"uav_{i}": self.uav_list[i] for i in range(self.uav_cnt)}
 
-        self._pos = np.zeros((self.uav_cnt, 3))
+        self._pos = np.zeros((self.uav_cnt, 3)) 
         self._tar = np.zeros((self.uav_cnt, 2))
         self._theta = np.zeros((self.uav_cnt,))
         self._succ = np.zeros(self.uav_cnt, np.bool8)
@@ -130,7 +130,7 @@ class CrossCurtain:
 
         for i in range(self.uav_cnt):
             r = 0
-            r += -(now_dist[i] - prev_dist[i])  # DIST BASED REW
+            r += -2*(now_dist[i] - prev_dist[i])  # DIST BASED REW
 
             dist2uav = np.linalg.norm(obs[f'uav_{i}'][9:11])
             if dist2uav < 0.2:  # COLLISION RISK
@@ -143,7 +143,11 @@ class CrossCurtain:
 
             if -0.15 < self._pos[i, 1] < 0.15:
                 if not self.in_the_hole(self._pos[i]):  # COLLISION WITH CURTAIN
-                    r += -2
+                    r += -5
+            
+            if not self._passed[i] and self._pos[i, 1] > 0:  # GOT TO PASS THE CURTAIN
+                self._passed[i] = True  # ONLY REWARD ONCE
+                r += 20
 
             rew[f'uav_{i}'] = r
         return rew
@@ -208,3 +212,6 @@ class CrossCurtain:
             pygame.draw.circle(self.screen, "red", self._tar[i] * self.scale + self.offset, 5)
 
         pygame.display.flip()
+        
+        # collect frames for gif
+        pygame.image.save(self.screen, f"D:/NJU_undergraduate/大三下/无人机/homework/GIFs/cross_curtain/cross_curtain_{self._step}.png")
