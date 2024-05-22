@@ -19,7 +19,7 @@ class CrossCurtain:
             self.uav_list.append(SimUav())
         self.uavs = {f"uav_{i}": self.uav_list[i] for i in range(self.uav_cnt)}
 
-        self._pos = np.zeros((self.uav_cnt, 3)) 
+        self._pos = np.zeros((self.uav_cnt, 3))
         self._tar = np.zeros((self.uav_cnt, 2))
         self._theta = np.zeros((self.uav_cnt,))
         self._succ = np.zeros(self.uav_cnt, np.bool8)
@@ -143,7 +143,7 @@ class CrossCurtain:
 
             if -0.15 < self._pos[i, 1] < 0.15:
                 if not self.in_the_hole(self._pos[i]):  # COLLISION WITH CURTAIN
-                    r += -5
+                    r += -3
             
             if not self._passed[i] and self._pos[i, 1] > 0:  # GOT TO PASS THE CURTAIN
                 self._passed[i] = True  # ONLY REWARD ONCE
@@ -156,7 +156,7 @@ class CrossCurtain:
         px = pos[0]
         pz = pos[2]
 
-        c_w = 0.4
+        c_w = 0.36
         for i in range(2):
             cx = self._cur_center[i, 0]
             cz = self._cur_center[i, 2]
