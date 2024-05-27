@@ -127,27 +127,38 @@ class CrossCurtain:
         rew = {}
         prev_dist = np.linalg.norm(self._prev_pos[:, :2] - self._tar[:, :2], axis=1)
         now_dist = np.linalg.norm(self._pos[:, :2] - self._tar[:, :2], axis=1)
-
+        
         for i in range(self.uav_cnt):
+            if i == 0 or i == 1:
+                prevdist2curtaincenter = np.linalg.norm(self._prev_pos[:, :] - self._cur_center[0, :], axis=1)
+                nowdist2curtaincenter = np.linalg.norm(self._pos[:, :] - self._cur_center[0, :], axis=1)
+            else:
+                prevdist2curtaincenter = np.linalg.norm(self._prev_pos[:, :] - self._cur_center[1, :], axis=1)
+                nowdist2curtaincenter = np.linalg.norm(self._pos[:, :] - self._cur_center[1, :], axis=1)
+            
             r = 0
-            r += -2*(now_dist[i] - prev_dist[i])  # DIST BASED REW
+            
+            if not self._passed[i]:
+                r += -5*(nowdist2curtaincenter[i] - prevdist2curtaincenter[i])  # DIST TO CURTAIN CENTER
+            else:
+                r += -(now_dist[i] - prev_dist[i])  # DIST BASED REW
 
-            dist2uav = np.linalg.norm(obs[f'uav_{i}'][9:11])
-            if dist2uav < 0.2:  # COLLISION RISK
-                r += -2
+            # dist2uav = np.linalg.norm(obs[f'uav_{i}'][9:11])
+            # if dist2uav < 0.2:  # COLLISION RISK
+            #     r += -2
 
             dist2tar = np.linalg.norm(self._pos[i, :2] - self._tar[i, :2])
             if dist2tar < 0.2:  # REACH TARGET
                 self._succ[i] = True
                 r += 20
 
-            if -0.15 < self._pos[i, 1] < 0.15:
-                if not self.in_the_hole(self._pos[i]):  # COLLISION WITH CURTAIN
-                    r += -3
+            # if -0.15 < self._pos[i, 1] < 0.15:
+            #     if not self.in_the_hole(self._pos[i]):  # COLLISION WITH CURTAIN
+            #         r += -2
             
-            if not self._passed[i] and self._pos[i, 1] > 0:  # GOT TO PASS THE CURTAIN
+            if not self._passed[i] and self._pos[i, 1] > 0 and self.in_the_hole(self._pos[i]):  # GOT TO PASS THE CURTAIN
                 self._passed[i] = True  # ONLY REWARD ONCE
-                r += 20
+                r += 10
 
             rew[f'uav_{i}'] = r
         return rew
@@ -156,7 +167,7 @@ class CrossCurtain:
         px = pos[0]
         pz = pos[2]
 
-        c_w = 0.36
+        c_w = 0.4
         for i in range(2):
             cx = self._cur_center[i, 0]
             cz = self._cur_center[i, 2]
